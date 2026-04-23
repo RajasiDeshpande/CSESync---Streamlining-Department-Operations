@@ -104,9 +104,21 @@ const Register = () => {
       {/* Right side - Register Form */}
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 lg:p-12 bg-gray-50/30 overflow-y-auto">
         <div className="w-full max-w-md space-y-8 my-12">
-          <div className="lg:hidden flex justify-center mb-6">
-            <div className="bg-indigo-600 p-4 rounded-2xl shadow-xl flex items-center justify-center">
-              <i className="fa-solid fa-layer-group text-white text-3xl"></i>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
+            <Link 
+              to="/" 
+              className="inline-flex items-center text-sm font-bold text-gray-400 hover:text-indigo-600 transition-all group mb-4 sm:mb-0"
+            >
+              <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center mr-3 group-hover:bg-indigo-50 group-hover:shadow-md transition-all">
+                <i className="fa-solid fa-arrow-left text-xs"></i>
+              </div>
+              <span>Return to Home</span>
+            </Link>
+            
+            <div className="lg:hidden flex justify-center">
+              <div className="bg-indigo-600 p-3 rounded-2xl shadow-xl flex items-center justify-center">
+                <i className="fa-solid fa-layer-group text-white text-2xl"></i>
+              </div>
             </div>
           </div>
 
@@ -209,7 +221,6 @@ const Register = () => {
                     <option value="student">Student</option>
                     <option value="professor">Professor</option>
                     <option value="club">Club Member</option>
-                    <option value="admin">Administrator</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
                     <i className="fa-solid fa-chevron-down text-xs"></i>

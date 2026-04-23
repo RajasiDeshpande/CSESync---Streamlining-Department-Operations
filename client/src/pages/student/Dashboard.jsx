@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import StatCard from '../../components/dashboard/StatCard';
 
 const StudentDashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
         const res = await api.get('/student/dashboard');
-        setData(res.data);
+        setData(res.data.data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -21,57 +23,124 @@ const StudentDashboard = () => {
     fetchDashboard();
   }, []);
 
-  if (loading) return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div></div>;
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="h-16 w-16 rounded-full border-4 border-gray-200"></div>
+            <div className="absolute top-0 h-16 w-16 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+          </div>
+          <p className="font-bold text-gray-400 animate-pulse uppercase tracking-widest text-xs">Syncing Academic Data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Student Dashboard</h1>
-            <p className="text-gray-500 mt-1">Academics & Department Synergy</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
-              {user?.role}
-            </span>
-            <button 
-              onClick={logout}
-              className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            >
-              Sign Out
-            </button>
-          </div>
-        </header>
+    <DashboardLayout>
+      {/* Header */}
+      <div className="mb-10">
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Student Portal</h1>
+        <p className="text-gray-500 font-medium italic">Welcome back, {user?.name}. Here's your academic summary.</p>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Backend Message</h3>
-            <p className="text-xl font-bold text-gray-900">{data?.message}</p>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <StatCard 
+          label="Enrolled Courses" 
+          value={data?.stats?.enrolledCourses || 0} 
+          color="blue" 
+          icon={<i className="fa-solid fa-book-open"></i>}
+        />
+        <StatCard 
+          label="Campus Events" 
+          value={data?.stats?.upcomingEvents || 0} 
+          color="indigo" 
+          icon={<i className="fa-solid fa-calendar-star"></i>}
+        />
+        <StatCard 
+          label="Unread Alerts" 
+          value={data?.stats?.unreadNotifications || 0} 
+          color="purple" 
+          icon={<i className="fa-solid fa-bell"></i>}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Campus Radar - Events */}
+        <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-8">
+          <div className="flex justify-between items-center mb-8">
+             <h3 className="text-xl font-black text-gray-900 tracking-tight">Campus Radar</h3>
+             <span className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">New Events</span>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">User Session</h3>
-            <p className="text-xl font-bold text-gray-900">{user?.name}</p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Academic Status</h3>
-            <p className="text-xl font-bold text-indigo-600">Active</p>
+          <div className="space-y-4">
+            {data?.upcomingEvents?.length > 0 ? (
+              data.upcomingEvents.map((event) => (
+                <div key={event._id} className="flex items-center gap-6 p-4 rounded-3xl bg-gray-50 border border-gray-100 hover:border-indigo-100 transition-all hover:bg-white hover:shadow-md group">
+                   <div className="h-16 w-16 rounded-2xl bg-white flex flex-col items-center justify-center shadow-sm border border-gray-100 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                      <span className="text-[10px] font-black uppercase tracking-tighter opacity-60 leading-none mb-1">
+                        {new Date(event.date).toLocaleString('default', { month: 'short' })}
+                      </span>
+                      <span className="text-xl font-black leading-none">
+                        {new Date(event.date).getDate()}
+                      </span>
+                   </div>
+                   <div className="flex-1">
+                      <h4 className="font-bold text-gray-900 leading-tight mb-1">{event.title}</h4>
+                      <div className="flex items-center gap-3 text-xs text-gray-400 font-bold">
+                        <span className="flex items-center gap-1"><i className="fa-solid fa-location-dot"></i> {event.location}</span>
+                        <span className="h-1 w-1 rounded-full bg-gray-200"></span>
+                        <span className="uppercase">{event.category}</span>
+                      </div>
+                   </div>
+                   <button className="h-10 w-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition-all group-hover:bg-indigo-50">
+                      <i className="fa-solid fa-chevron-right text-xs"></i>
+                   </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400 italic py-4">No upcoming events found.</p>
+            )}
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-8 text-white shadow-lg overflow-hidden relative">
-          <div className="relative z-10">
-            <h2 className="text-2xl font-bold mb-4">Welcome to Phase 2</h2>
-            <p className="text-indigo-100 max-w-xl">
-              You have successfully authenticated with CSESync. In Phase 3, you'll be able to manage your academic modules, tracks and departmental activities right from here.
-            </p>
-          </div>
+        {/* Recent Announcements */}
+        <div className="bg-gradient-to-br from-indigo-900 to-indigo-950 rounded-[32px] p-8 text-white shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-10">
-            <svg className="h-48 w-48" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-3.142.639 2.99 2.99 0 01-2.698 0 8.965 8.965 0 00-3.14-.639z"/></svg>
+            <i className="fa-solid fa-bullhorn text-8xl -rotate-12"></i>
+          </div>
+          <div className="relative z-10 h-full flex flex-col">
+            <div className="flex justify-between items-center mb-8">
+               <h3 className="text-xl font-black tracking-tight">Recent Announcements</h3>
+               <div className="flex gap-1.5">
+                 <div className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse"></div>
+                 <div className="h-1.5 w-1.5 rounded-full bg-blue-400/40"></div>
+                 <div className="h-1.5 w-1.5 rounded-full bg-blue-400/20"></div>
+               </div>
+            </div>
+            <div className="space-y-6 flex-1">
+              {data?.recentNotifications?.length > 0 ? (
+                data.recentNotifications.map((notif) => (
+                  <div key={notif._id} className="group cursor-pointer">
+                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1 opacity-80">
+                      {new Date(notif.createdAt).toLocaleDateString()} • FROM {notif.category || 'SYSTEM'}
+                    </p>
+                    <h4 className="font-bold text-lg leading-tight group-hover:text-blue-300 transition-colors">{notif.title}</h4>
+                    <p className="text-sm text-indigo-200/60 line-clamp-1 mt-1">{notif.message}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-indigo-300 italic opacity-50">No new announcements at this time.</p>
+              )}
+            </div>
+            <button className="mt-8 py-4 bg-white/10 hover:bg-white/20 rounded-2xl w-full text-xs font-black uppercase tracking-[0.2em] transition-all border border-white/5 backdrop-blur-md">
+              View All Alerts
+            </button>
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

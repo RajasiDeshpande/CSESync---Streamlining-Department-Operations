@@ -6,6 +6,14 @@ const { signToken } = require('../utils/jwtToken');
 // @access  Public
 exports.register = async (req, res, next) => {
   const { name, email, password, role } = req.body;
+  
+  // Prevent registering as admin
+  if (role === 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Self-registration as an administrator is not permitted.'
+    });
+  }
 
   try {
     // Create user

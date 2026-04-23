@@ -28,6 +28,9 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/student', require('./routes/student'));
 app.use('/api/professor', require('./routes/professor'));
 app.use('/api/club', require('./routes/club'));
+app.use('/api/courses', require('./routes/courses'));
+app.use('/api/events', require('./routes/events'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 const PORT = process.env.PORT || 5000;
 
